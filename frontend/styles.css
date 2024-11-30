@@ -1,0 +1,308 @@
+﻿/* Base styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+}
+
+#container {
+    display: flex;
+    width: 100%;
+}
+
+#sidebar {
+    width: 250px;
+    background-color: #1e1e1e;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    overflow-y: auto; /* Allow sidebar scrolling if session list overflows */
+}
+
+#sessionList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow: visible; /* Allow dropdown to be fully visible */
+}
+
+#sessionList li {
+    margin: 5px 0;
+    padding: 10px;
+    background-color: #1e1e1e;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    display: flex; /* Flex for alignment */
+    justify-content: space-between; /* Space between session name and dropdown */
+    align-items: center;
+    position: relative; /* For dropdown positioning */
+}
+
+#sessionList li:hover {
+    background-color: #333;
+    color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.6); /* Shadow on hover */
+}
+
+.active-session {
+    background-color: #0048b3;
+    font-weight: bold;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
+}
+
+.active-session:hover {
+    background-color: #0056b3;
+    color: #ffffff;
+}
+
+#chatContainer {
+    flex: 1; /* Chat container takes available space */
+    display: flex;
+    flex-direction: column;
+    background-color: #222;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px;
+    overflow: visible; /* Ensure the chat container doesn't clip dropdown */
+}
+
+#chatWindow {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #222;
+    border-left: 1px solid #444;
+    color: white;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #333;
+}
+
+.user {
+    text-align: right;
+    background-color: #007bff;
+    color: white;
+}
+
+.bot {
+    text-align: left;
+    background-color: #444;
+    color: white;
+}
+
+#controls {
+    display: flex;
+    justify-content: center; /* Center controls */
+    padding: 10px;
+    background-color: #333;
+    border-top: 1px solid #444;
+}
+
+#controls input {
+    flex: 1;
+    margin-right: 10px;
+    padding: 10px;
+    border: 1px solid #444;
+    background-color: #444;
+    color: white;
+    border-radius: 4px;
+}
+
+#controls input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+#controls button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#controls button:hover {
+    background-color: #0056b3;
+}
+
+h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: white;
+}
+
+#addSessionBtn,
+#removeSessionBtn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: 1.2em;
+    margin-left: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border-radius: 4px;
+}
+
+#addSessionBtn:hover,
+#removeSessionBtn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Scrollbar customization */
+#sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 10px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+/* Dropdown menu styling */
+.dropdown {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Dropdown content styling */
+.dropdown-content {
+    position: absolute;
+    background-color: #1e1e1e; /* Adjusted for consistency */
+    border: 1px solid #ccc;
+    display: none;
+    z-index: 2000;
+    min-width: 150px;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    top: 100%; /* Below the button */
+    right: 0; /* Align to the right */
+    transition: opacity 0.2s ease, visibility 0.2s ease; /* Added transitions */
+}
+
+/* Show dropdown on click */
+.dropdown-content.show {
+    display: block;
+    opacity: 1; /* Make it visible */
+    visibility: visible; /* Keep it visible */
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #333;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    #sidebar {
+        width: 100%;
+        padding: 10px;
+    }
+
+    #chatContainer {
+        max-width: 100%;
+    }
+
+    #controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #controls input {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    #controls button {
+        width: 100%;
+    }
+}
+
+.message.user {
+    max-width: 70%;                  /* 70% of the chat window width */
+    word-wrap: break-word;           /* Break long words */
+    white-space: normal;             /* Allow line wrapping */
+    background-color: #666;       /* Light green background */
+    padding: 10px;                   /* Padding for readability */
+    border-radius: 10px;             /* Rounded corners */
+    margin: 5px 0;                   /* Space between messages */
+    text-align: left !important;     /* Force left-align text */
+    overflow-wrap: break-word;       /* Ensure text wraps correctly */
+    align-self: flex-end;               /* Align to the right */
+}
+
+/* Apply this to #chatWindow if it's a flex container */
+#chatWindow {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;         /* Align items to the left */
+}
+
+.session-item {
+    display: flex;                     /* Use flexbox for alignment */
+    justify-content: space-between;    /* Space between name and dropdown button */
+    align-items: center;               /* Center items vertically */
+    padding: 10px;                     /* Padding for better touch area */
+}
+
+.session-name {
+    flex-grow: 1;                      /* Allow session name to grow and fill space */
+    overflow: hidden;                  /* Hide overflow if text is too long */
+    text-overflow: ellipsis;           /* Show ellipsis for overflow text */
+    white-space: nowrap;               /* Prevent text from wrapping */
+}
+
+.message.bot {
+    max-width: 100%;                     /* Width is 70% of the chat window */
+    word-wrap: break-word;              /* Break long words onto the next line */
+    white-space: normal;                /* Allow wrapping of long sentences */
+    background-color: #444;          /* Background color for bot messages */
+    padding: 10px;                      /* Padding for readability */
+    border-radius: 10px;                /* Rounded corners */
+    margin: 5px 0;                      /* Space between messages */
+    text-align: left;                   /* Align text to the left */
+    overflow-wrap: break-word;          /* Ensure all text wraps correctly */
+    align-self: flex-start;             /* Align bot messages to the left */
+}
+
+#userInput {
+    width: 100%;                   /* Full width of the parent container */
+    max-height: 45px;             /* Max height */
+    resize: none;                 /* Disable manual resizing */
+    padding: 10px;                /* Padding for better appearance */
+    border: 1px solid #ccc;       /* Border for the input */
+    border-radius: 5px;           /* Rounded corners */
+}

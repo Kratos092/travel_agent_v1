@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/frontend/styles.css">
+    <title>Travel Agent</title>
+
+    <!-- Include Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="container">
+        <div id="sidebar">
+            <h2>
+                Attentions.ai
+                <button id="addSessionBtn">+</button>
+                <button id="removeSessionBtn">-</button>
+            </h2>
+            <ul id="sessionList">
+                <!-- Dynamic session items will be rendered here by script.js -->
+            </ul>
+        </div>
+        <div id="chatContainer">
+            <div id="chatWindow"></div>
+            <div id="controls">
+                <select id="modeToggle">
+                    <option value="agent">Agent</option>
+                </select>
+                <textarea id="userInput" placeholder="Type your question here..." rows="1"></textarea>
+                <button id="sendButton">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/frontend/script.js"></script>
+</body>
+</html>

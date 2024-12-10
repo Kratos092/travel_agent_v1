@@ -88,6 +88,17 @@ function promptForSessionName() {
     }
 }
 
+
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+
 // Function to send a message
 function sendMessage() {
     const userInputElement = document.getElementById("userInput");
@@ -108,7 +119,6 @@ function sendMessage() {
     userInputElement.value = '';
 
     // Fetch bot response
-    // Fetch bot response
     fetch("/query", {
         method: "POST",
         headers: {
@@ -123,16 +133,21 @@ function sendMessage() {
     .then(data => {
         const botResponse = data.text_response;
 
-        // Convert Markdown to HTML (simple handling)
-        const markdownHtml = marked.parse(botResponse);
+
+        //        const sanitizedResponse = DOMPurify.sanitize(botResponse);
 
         // Display the response in the chat window
         const botMessageDiv = document.createElement("div");
         botMessageDiv.className = "message bot";
-        botMessageDiv.innerHTML = markdownHtml;
-
+        botMessageDiv.innerHTML = botResponse;
+            
         chatWindow.appendChild(botMessageDiv);
-        chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll
+         // Trigger a re-render by briefly removing the message and adding it back
+        botMessageDiv.style.display = 'block';
+        requestAnimationFrame(() => {
+            botMessageDiv.style.display = '';
+        });
+        chatWindow.scrollTop = chatWindow.scrollHeight;
     })
     .catch(error => {
         console.error('Error fetching response:', error);
@@ -141,7 +156,7 @@ function sendMessage() {
         errorMessageDiv.textContent = "Error fetching response. Please try again.";
         chatWindow.appendChild(errorMessageDiv);
     });
-
+}
 
 // Function to save the conversation to the database
 function saveMessageToDatabase(userMessage, botResponse) {
@@ -302,7 +317,7 @@ function renameSession(oldSessionName) {
 }
 
 
-const userInput = document.getElementById("userInput");
+userInput = document.getElementById("userInput");
 
 userInput.addEventListener("input", () => {
     userInput.style.height = 'auto'; // Reset the height

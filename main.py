@@ -4,7 +4,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from app.agents.utils import generate_llm_response
+#from app.agents.utils import generate_llm_response, context
+import app.agents.utils as utils
 from app.database_module.database import *
 # create_tables, save_session, load_messages, delete_session, list_sessions, save_message,rename_session
 import numpy as np
@@ -19,11 +20,11 @@ create_tables()  # Initialize the database tables
 app = FastAPI()
 
 # Mount static files for the frontend
-app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+app.mount("/frontend", StaticFiles(directory="frontend",html=True), name="frontend")
 
 @app.get("/")
 async def read_root():
-    return {"message": "Welcome to the RAG System!"}
+    return {"message": "Welcome to the Travel Agent v1!"}
 
 class Query(BaseModel):
     question: str
@@ -36,7 +37,7 @@ async def get_response(query: Query, background_tasks: BackgroundTasks):
 
  
     
-    response_text = generate_llm_response(query.question)
+    response_text = utils.generate_llm_response(query.question)
 
     # Add the text_to_speech function to the background tasks
 #        background_tasks.add_task(text_to_speech, response_text)  # Run in the background
@@ -61,6 +62,19 @@ async def save_chat_session(session: SessionName):
 @app.get("/load_session/{session_name}")
 async def load_chat_session(session_name: str):
     messages = load_messages(session_name)
+    # build context while loading session
+    #global context
+    if utils.context:
+        utils.context.clear()
+    utils.context = [
+    {"role": "system", "content": utils.router_instructions},
+    ]
+    utils.context.extend([
+    {"role": "user", "content": user} 
+    if i % 2 == 0 else {"role": "assistant", "content": bot}
+    for i, (user, bot) in enumerate(messages)
+    ])
+#    print(utils.context)
     if not messages:
         raise HTTPException(status_code=404, detail="Session not found.")
     return {"messages": [{"user_message": user, "bot_response": bot} for user, bot in messages]}
@@ -93,15 +107,14 @@ async def save_message_endpoint(message: SaveMessageRequest):
     logger.info(f"Saving message: {message}")
     try:
         save_message(message.session_name, message.user_message, message.bot_response)
+        # adding to current context
+        utils.context.append({"role":"user","content": message.user_message, "role":"system","content": message.bot_response})
         return {"detail": "Message saved successfully."}
     except Exception as e:
         logger.error(f"Error saving message: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/load_messages/{session_name}")
-async def load_messages_endpoint(session_name: str):
-    messages = load_messages(session_name)  # Fetch messages from the database
-    return [{"user_message": user, "bot_response": bot} for user, bot in messages]
+# useless load_messages_endpoint
 
 class RenameSessionRequest(BaseModel):
     new_session_name: str
@@ -114,9 +127,6 @@ async def rename_session_route(old_session_name: str, request: RenameSessionRequ
         return {"message": f"Session renamed from {old_session_name} to {request.new_session_name}"}
     except Exception as e:
         return {"error": str(e)}, 500
-
-
-
 
 
 

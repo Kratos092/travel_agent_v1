@@ -1,8 +1,10 @@
+
 from openai import OpenAI
 import json
 import os
+from markdown import markdown
 
-use_llama = True 
+use_llama = False 
 if use_llama :
     model_base="llama3.2"
     client = OpenAI(
@@ -12,7 +14,7 @@ if use_llama :
 else :
     model_base="gpt-4o-mini"
     client = OpenAI(
-        api_key= os.getenv('OPENAI_API_KEY')
+        api_key= "YOUR_OPENAI_KEY"
     )
 
 router_instructions = """
@@ -85,7 +87,7 @@ def questionnaire_Agent(query) :
     )
     response_text = response.choices[0].message.content
     print("completed questionnaire_Agent")
-    return response_text
+    return markdown(response_text)
 
 
 def Planner_Agent(query) :
@@ -97,7 +99,7 @@ def Planner_Agent(query) :
     )
     response_text = response.choices[0].message.content
     print("completed Planner_Agent")
-    return response_text
+    return markdown(response_text)
 
 
 def Optimization_Agent(query) :
@@ -108,18 +110,68 @@ def Optimization_Agent(query) :
     )
     response_text = response.choices[0].message.content
     print("completed Optimization_Agent")
-    return response_text
+    return markdown(response_text)
 
 
-def Weather_Agent(query) :
-    Instructions = """fetch the expected weather conditions of the region during the time of visit"""
+import logging
+import os
+import requests
+# Add your OpenWeatherMap API key here
+OPENWEATHER_API_KEY = os.getenv('OPENWEATHERMAP_API_KEY')
+
+
+def Weather_Agent(query):
+    """
+    Weather_Agent fetches the weather information either through OpenWeatherMap API
+    or uses the language model as a fallback.
+    """
+    # Extract city and timeframe from the query
+    Instructions = """
+    You are a weather information assistant. Your task is to extract relevant details about the weather query 
+    and respond in a JSON format with the following keys:
+    - "city": The name of the city mentioned in the user's query (required).
+    - "timeframe": The timeframe for the weather (e.g., "current", "next week", "weekend"). Default to "current" if not mentioned.
+
+    If the city is not mentioned in the query, respond with:
+    {"error": "City not specified"}
+
+    If the timeframe is not mentioned, use the default value "current".
+    """
+    
     response = client.chat.completions.create(
         model=model_base,
-        messages=[{"role": "system", "content": Instructions} , {"role": "user", "content": query}],
+        messages=[{"role": "system", "content": Instructions}, {"role": "user", "content": query}],
     )
     response_text = response.choices[0].message.content
-    print("completed Weather_Agent")
-    return response_text
+
+    # Assume response_text provides city and timeframe in a structured format
+    try:
+        # Parse city and optional timeframe
+        details = json.loads(response_text)  # Expect structured response
+        city = details.get("city")
+        timeframe = details.get("timeframe", "current")
+
+        if not city:
+            return "Unable to determine the city from your query. Please specify the city."
+
+        # Fetch weather data using OpenWeatherMap API
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={OPENWEATHER_API_KEY}&units=metric"
+        weather_response = requests.get(url)
+
+        if weather_response.status_code == 200:
+            weather_data = weather_response.json()
+            weather_desc = weather_data['weather'][0]['description']
+            temp = weather_data['main']['temp']
+            return f"The weather in {city} is currently {weather_desc} with a temperature of {temp}°C."
+        else:
+            logging.error(f"Weather API Error: {weather_response.status_code} - {weather_response.text}")
+            return "Error fetching weather data."
+
+    except Exception as e:
+        logging.exception("An error occurred while processing the weather information.")
+        # Fallback to LLM
+        return markdown(response_text)
+
 
 
 tools = [
@@ -227,5 +279,6 @@ def generate_llm_response(text) :
         return response_text 
     else :
         response_text = response.choices[0].message.content
-        context.append({"role": "assistant", "content": response_text})
-        return response_text
+        context.append({"role": "assistant", "content": markdown(response_text)})
+        return markdown(response_text)
+
